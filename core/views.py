@@ -14,13 +14,16 @@ from django_filters.views import FilterView
 from collections import defaultdict
 from django.views.generic import ListView, DetailView, TemplateView
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
 from datetime import timedelta
 import json
 from django_tables2.export.export import TableExport
 from django_tables2 import SingleTableMixin
+from django.views.decorators.cache import cache_control
+from django.conf import settings
+import os
 
 from .forms import SignUpForm, EntryForm, CategoryForm, UserProfileForm
 from .models import Entry, Category, UserProfile
@@ -357,3 +360,11 @@ class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         messages.success(self.request, 'Profile updated successfully!')
         return super().form_valid(form)
+
+@cache_control(max_age=0, no_cache=True, no_store=True, must_revalidate=True)
+def service_worker(request):
+    response = HttpResponse(
+        open(os.path.join(settings.STATICFILES_DIRS[0], 'sw.js')).read(),
+        content_type='application/javascript'
+    )
+    return response

@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#206bc4">
+    <!-- Standard web app capable meta tag -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <!-- Apple-specific meta tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Paisalog">
@@ -12,10 +15,7 @@
     <link rel="apple-touch-icon" href="{% static 'img/icon-192x192.png' %}">
     <title>{% block title %}Paisalog{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/tabler.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/tabler-flags.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/tabler-payments.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/tabler-vendors.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/demo.min.css' %}">
+    <link rel ="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
     <style>
         :root {
             --tblr-body-bg: #f5f7fb;
