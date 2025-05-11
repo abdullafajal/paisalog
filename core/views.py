@@ -260,7 +260,12 @@ class EntryUpdateView(LoginRequiredMixin, UpdateView):
     model = Entry
     form_class = EntryForm
     template_name = 'entries/form.html'
-    success_url = '/entries/'
+    success_url = reverse_lazy('entry_list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
 
     def get_queryset(self):
         return Entry.objects.filter(user=self.request.user)

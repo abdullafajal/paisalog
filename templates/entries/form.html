@@ -123,6 +123,9 @@
                 {% if not form.instance.pk %}
                 <input type="hidden" name="entry_type" value="{{ request.GET.type }}">
                 {% endif %}
+                {% if form.instance.pk %}
+                <input type="hidden" name="entry_type" value="{{ form.instance.entry_type }}">
+                {% endif %}
                 
                 <div class="row g-3">
                     <!-- Amount -->
