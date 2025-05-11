@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load django_tables2 %}
+{% load django_bootstrap5 %}
+{% load static %}
+
+{% block title %}Entries | Paisalog{% endblock %}
+
+{% block content %}
+<div class="container-xl">
+    <!-- Page title -->
+    <div class="page-header d-print-none">
+        <div class="row align-items-center">
+            <div class="col">
+                <h2 class="page-title">
+                    Entries
+                </h2>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <button type="button" class="btn btn-ghost-primary" id="filterToggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-filter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                            <path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.828 4.828v7l-6 2v-8.5l-4.828 -4.828a2 2 0 0 1 -.586 -1.414v-2.172z"></path>
+                        </svg>
+                        Filter
+                    </button>
+                    <div class="btn-list flex-nowrap">
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                    <path d="M12 5l0 14"></path>
+                                    <path d="M5 12l14 0"></path>
+                                </svg>
+                                Add Entry
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="{% url 'entry_create' %}?type=income">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-down-right text-success me-2" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                        <path d="M7 7l10 10"></path>
+                                        <path d="M17 8l0 9l-9 0"></path>
+                                    </svg>
+                                    Add Income
+                                </a>
+                                <a class="dropdown-item" href="{% url 'entry_create' %}?type=expense">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-up-right text-danger me-2" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                        <path d="M17 7l-10 10"></path>
+                                        <path d="M8 7l9 0l0 9"></path>
+                                    </svg>
+                                    Add Expense
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row row-deck row-cards mb-4">
+        <div class="col-sm-6 col-lg-4">
+            <div class="card card-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-md bg-success-lt">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
+                                <path d="M15 9l-6 6"></path>
+                                <path d="M9 9l6 6"></path>
+                            </svg>
+                        </div>
+                        <div class="ms-3">
+                            <div class="text-muted">Total Income</div>
+                            <div class="h3 mb-0">₹{{ total_income|floatformat:2 }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <div class="card card-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-md bg-danger-lt">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
+                                <path d="M15 9l-6 6"></path>
+                                <path d="M9 9l6 6"></path>
+                            </svg>
+                        </div>
+                        <div class="ms-3">
+                            <div class="text-muted">Total Expenses</div>
+                            <div class="h3 mb-0">₹{{ total_expenses|floatformat:2 }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <div class="card card-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-md bg-primary-lt">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
+                                <path d="M12 8l0 8"></path>
+                                <path d="M8 12l8 0"></path>
+                            </svg>
+                        </div>
+                        <div class="ms-3">
+                            <div class="text-muted">Current Balance</div>
+                            <div class="h3 mb-0">₹{{ current_balance|floatformat:2 }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Export -->
+    <div class="card mb-3 d-none" id="filterSection">
+        <div class="card-header">
+            <h3 class="card-title">Filter Entries</h3>
+            <div class="card-actions">
+                <button type="button" class="btn btn-ghost-secondary btn-sm" id="resetFilters">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-refresh" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path>
+                        <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path>
+                    </svg>
+                    Reset
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3" id="filterForm">
+                {% for field in filter.form %}
+                <div class="col-md-4">
+                    <label class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+                {% endfor %}
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-filter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                            <path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.828 4.828v7l-6 2v-8.5l-4.828 -4.828a2 2 0 0 1 -.586 -1.414v-2.172z"></path>
+                        </svg>
+                        Apply Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Entries Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Entries</h3>
+            <div class="card-actions">
+                {% for format in view.export_formats %}
+                <a href="{% export_url format %}" class="btn btn-ghost-primary btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-download" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
+                        <path d="M7 11l5 5l5 -5"></path>
+                        <path d="M12 4l0 12"></path>
+                    </svg>
+                    {{ format|upper }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                {% render_table table %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Filter toggle functionality
+        const filterToggle = document.getElementById('filterToggle');
+        const filterSection = document.getElementById('filterSection');
+        const resetFilters = document.getElementById('resetFilters');
+        const filterForm = document.getElementById('filterForm');
+
+        filterToggle.addEventListener('click', function() {
+            filterSection.classList.toggle('d-none');
+        });
+
+        resetFilters.addEventListener('click', function() {
+            const inputs = filterForm.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                if (input.type === 'text' || input.type === 'number') {
+                    input.value = '';
+                } else if (input.type === 'select-one') {
+                    input.selectedIndex = 0;
+                }
+            });
+            filterForm.submit();
+        });
+
+        // Add Bootstrap classes to form fields
+        const formControls = document.querySelectorAll('input, select, textarea');
+        formControls.forEach(control => {
+            control.classList.add('form-control');
+        });
+    });
+</script>
+{% endblock %} 

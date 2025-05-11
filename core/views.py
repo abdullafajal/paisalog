@@ -1,0 +1,354 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import login, authenticate, logout as auth_logout
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db.models import Sum
+from django.utils import timezone
+from django.urls import reverse_lazy
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django_tables2 import SingleTableView, RequestConfig
+from django_tables2.export import ExportMixin
+from django_filters.views import FilterView
+from collections import defaultdict
+from django.views.generic import ListView, DetailView, TemplateView
+from django.db.models import Q
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+from django.utils.decorators import method_decorator
+from datetime import timedelta
+import json
+from django_tables2.export.export import TableExport
+from django_tables2 import SingleTableMixin
+
+from .forms import SignUpForm, EntryForm, CategoryForm, UserProfileForm
+from .models import Entry, Category, UserProfile
+from .tables import EntryTable, CategoryTable, RecentEntryTable
+from .filters import EntryFilter
+
+def create_default_categories():
+    default_categories = [
+        # Income categories
+        {'name': 'Salary', 'entry_type': 'income'},
+        {'name': 'Freelance', 'entry_type': 'income'},
+        {'name': 'Investments', 'entry_type': 'income'},
+        {'name': 'Gifts', 'entry_type': 'income'},
+        {'name': 'Other Income', 'entry_type': 'income'},
+        
+        # Expense categories
+        {'name': 'Food & Dining', 'entry_type': 'expense'},
+        {'name': 'Transportation', 'entry_type': 'expense'},
+        {'name': 'Housing', 'entry_type': 'expense'},
+        {'name': 'Utilities', 'entry_type': 'expense'},
+        {'name': 'Entertainment', 'entry_type': 'expense'},
+        {'name': 'Shopping', 'entry_type': 'expense'},
+        {'name': 'Healthcare', 'entry_type': 'expense'},
+        {'name': 'Education', 'entry_type': 'expense'},
+        {'name': 'Travel', 'entry_type': 'expense'},
+        {'name': 'Other Expenses', 'entry_type': 'expense'},
+    ]
+    
+    for category_data in default_categories:
+        Category.objects.get_or_create(
+            name=category_data['name'],
+            entry_type=category_data['entry_type'],
+            is_default=True
+        )
+
+def signup_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+        
+    if request.method == "POST":
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Create UserProfile for the new user
+            UserProfile.objects.create(user=user)
+            login(request, user)
+            # Create default categories for new user
+            create_default_categories()
+            return redirect("dashboard")
+    else:
+        form = SignUpForm()
+    return render(request, "registration/signup.html", {"form": form})
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+        
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect("dashboard")
+        else:
+            messages.error(request, "Invalid username or password.")
+    else:
+        form = AuthenticationForm()
+    return render(request, "registration/login.html", {"form": form})
+
+def logout_view(request):
+    auth_logout(request)
+    return redirect("login")
+
+@login_required
+def dashboard(request):
+    # Get date range
+    period_type = request.GET.get('period_type', 'month')
+    end_date = timezone.now().date()
+    
+    if period_type == 'year':
+        start_date = end_date - timedelta(days=365)
+    elif period_type == 'month':
+        start_date = end_date - timedelta(days=30)
+    else:  # day
+        start_date = end_date - timedelta(days=1)
+
+    # Get user's entries
+    user_entries = Entry.objects.filter(
+        user=request.user,
+        date__range=[start_date, end_date]
+    )
+
+    # Calculate totals
+    total_income = user_entries.filter(entry_type='income').aggregate(total=Sum('amount'))['total'] or 0
+    total_expenses = user_entries.filter(entry_type='expense').aggregate(total=Sum('amount'))['total'] or 0
+    current_balance = total_income - total_expenses
+
+    # Calculate savings rate
+    if total_income > 0:
+        savings_rate = ((total_income - total_expenses) / total_income) * 100
+    else:
+        savings_rate = 0
+
+    # Calculate budget utilization
+    if hasattr(request.user, 'profile') and request.user.profile.salary_amount:
+        budget_utilization = (total_expenses / request.user.profile.salary_amount) * 100
+    else:
+        budget_utilization = 0
+
+    # Get recent transactions
+    recent_transactions = Entry.objects.filter(user=request.user).order_by('-date', '-created_at')[:5]
+    recent_table = RecentEntryTable(recent_transactions)
+    RequestConfig(request).configure(recent_table)
+
+    # Get top categories
+    top_categories = []
+    for category in Category.objects.filter(
+        Q(user=request.user) | Q(is_default=True)
+    ).distinct():
+        category_total = user_entries.filter(category=category).aggregate(total=Sum('amount'))['total'] or 0
+        if category_total > 0:
+            percentage = (category_total / (total_income + total_expenses)) * 100 if (total_income + total_expenses) > 0 else 0
+            top_categories.append({
+                'name': category.name,
+                'total': category_total,
+                'type': category.entry_type,
+                'percentage': percentage
+            })
+
+    # Sort categories by total amount
+    top_categories.sort(key=lambda x: x['total'], reverse=True)
+    top_categories = top_categories[:4]  # Get top 4 categories
+
+    # Prepare chart data
+    monthly_data = []
+    savings_trend = []
+    category_data = []
+
+    # Monthly data for income vs expenses
+    current_date = start_date
+    while current_date <= end_date:
+        month_entries = user_entries.filter(date__month=current_date.month, date__year=current_date.year)
+        month_income = month_entries.filter(entry_type='income').aggregate(total=Sum('amount'))['total'] or 0
+        month_expenses = month_entries.filter(entry_type='expense').aggregate(total=Sum('amount'))['total'] or 0
+        
+        monthly_data.append({
+            'month': current_date.strftime('%b %Y'),
+            'income': float(month_income),
+            'expenses': float(month_expenses)
+        })
+        
+        # Calculate savings trend
+        target_savings = float(total_income) * 0.2  # 20% of total income as target
+        actual_savings = float(month_income - month_expenses)
+        savings_trend.append({
+            'month': current_date.strftime('%b %Y'),
+            'savings': actual_savings,
+            'target': target_savings
+        })
+        
+        current_date = (current_date.replace(day=1) + timedelta(days=32)).replace(day=1)
+
+    # Category distribution data
+    for category in Category.objects.filter(
+        Q(user=request.user) | Q(is_default=True)
+    ).distinct():
+        category_total = user_entries.filter(category=category).aggregate(total=Sum('amount'))['total'] or 0
+        if category_total > 0:
+            category_data.append({
+                'name': category.name,
+                'expenses': float(category_total) if category.entry_type == 'expense' else 0,
+                'income': float(category_total) if category.entry_type == 'income' else 0
+            })
+
+    context = {
+        'total_income': total_income,
+        'total_expenses': total_expenses,
+        'current_balance': current_balance,
+        'savings_rate': savings_rate,
+        'savings_progress': min(savings_rate / 20 * 100, 100),  # Progress towards 20% savings goal
+        'budget_utilization': budget_utilization,
+        'top_categories': top_categories,
+        'monthly_data': json.dumps(monthly_data),
+        'category_data': json.dumps(category_data),
+        'savings_trend': json.dumps(savings_trend),
+        'period_type': period_type,
+        'start_date': start_date,
+        'end_date': end_date,
+        'recent_table': recent_table,
+    }
+
+    return render(request, 'dashboard.html', context)
+
+class EntryListView(LoginRequiredMixin, ExportMixin, FilterView, SingleTableView):
+    model = Entry
+    table_class = EntryTable
+    filterset_class = EntryFilter
+    template_name = 'entries/list.html'
+    paginate_by = 10
+    export_formats = ['csv', 'xlsx']
+
+    def get_queryset(self):
+        return Entry.objects.filter(user=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_entries = Entry.objects.filter(user=self.request.user)
+        
+        # Calculate totals
+        total_income = user_entries.filter(entry_type='income').aggregate(total=Sum('amount'))['total'] or 0
+        total_expenses = user_entries.filter(entry_type='expense').aggregate(total=Sum('amount'))['total'] or 0
+        current_balance = total_income - total_expenses
+
+        context.update({
+            'total_income': total_income,
+            'total_expenses': total_expenses,
+            'current_balance': current_balance,
+        })
+        return context
+
+class EntryCreateView(LoginRequiredMixin, CreateView):
+    model = Entry
+    form_class = EntryForm
+    template_name = 'entries/form.html'
+    success_url = reverse_lazy('entry_list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+class EntryUpdateView(LoginRequiredMixin, UpdateView):
+    model = Entry
+    form_class = EntryForm
+    template_name = 'entries/form.html'
+    success_url = '/entries/'
+
+    def get_queryset(self):
+        return Entry.objects.filter(user=self.request.user)
+
+class EntryDeleteView(LoginRequiredMixin, DeleteView):
+    model = Entry
+    success_url = '/entries/'
+    template_name = 'entries/confirm_delete.html'
+
+    def get_queryset(self):
+        return Entry.objects.filter(user=self.request.user)
+
+class CategoryListView(LoginRequiredMixin, SingleTableView):
+    model = Category
+    table_class = CategoryTable
+    template_name = 'categories/list.html'
+    context_object_name = 'object_list'
+
+    def get_queryset(self):
+        return Category.objects.filter(
+            Q(user=self.request.user) | Q(is_default=True)
+        ).order_by('name')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        table = self.get_table(**self.get_table_kwargs())
+        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
+        context['table'] = table
+        return context
+
+class CategoryCreateView(LoginRequiredMixin, CreateView):
+    model = Category
+    form_class = CategoryForm
+    template_name = 'categories/form.html'
+    success_url = reverse_lazy('category_list')
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        messages.success(self.request, 'Category created successfully!')
+        return super().form_valid(form)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+class CategoryUpdateView(LoginRequiredMixin, UpdateView):
+    model = Category
+    form_class = CategoryForm
+    template_name = 'categories/form.html'
+    success_url = reverse_lazy('category_list')
+
+    def get_queryset(self):
+        return Category.objects.filter(user=self.request.user)
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Category updated successfully!')
+        return super().form_valid(form)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+class CategoryDeleteView(LoginRequiredMixin, DeleteView):
+    model = Category
+    template_name = 'categories/confirm_delete.html'
+    success_url = reverse_lazy('category_list')
+
+    def get_queryset(self):
+        return Category.objects.filter(user=self.request.user)
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, 'Category deleted successfully!')
+        return super().delete(request, *args, **kwargs)
+
+@method_decorator(login_required, name='dispatch')
+class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
+    model = UserProfile
+    form_class = UserProfileForm
+    template_name = 'profile_form.html'
+    success_url = reverse_lazy('dashboard')
+
+    def get_object(self, queryset=None):
+        # Ensure the profile exists
+        profile, created = UserProfile.objects.get_or_create(user=self.request.user)
+        return profile
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Profile updated successfully!')
+        return super().form_valid(form)

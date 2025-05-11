@@ -1,0 +1,764 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load core_extras %}
+{% load render_table from django_tables2 %}
+
+{% block title %}Dashboard | Paisalog{% endblock %}
+
+{% block content %}
+<div>
+    <!-- Period Selection -->
+    <div class="row row-deck row-cards mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3 align-items-center">
+                        <div class="col-auto">
+                            <label class="form-label">Period Type</label>
+                            <select name="period_type" class="form-select" onchange="this.form.submit()">
+                                <option value="year" {% if period_type == 'year' %}selected{% endif %}>Year</option>
+                                <option value="month" {% if period_type == 'month' %}selected{% endif %}>Month</option>
+                                <option value="day" {% if period_type == 'day' %}selected{% endif %}>Day</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <label class="form-label">Date Range</label>
+                            <div class="input-group">
+                                <input type="date" name="start_date" class="form-control" value="{{ start_date|date:'Y-m-d' }}" onchange="this.form.submit()">
+                                <span class="input-group-text">to</span>
+                                <input type="date" name="end_date" class="form-control" value="{{ end_date|date:'Y-m-d' }}" onchange="this.form.submit()">
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <label class="form-label">&nbsp;</label>
+                            <div>
+                                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Reset</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row row-deck row-cards mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Quick Actions</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-sm-6 col-lg-4">
+                            <div class="dropdown w-100">
+                                <button class="btn btn-primary w-100 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                        <path d="M12 5l0 14"></path>
+                                        <path d="M5 12l14 0"></path>
+                                    </svg>
+                                    Add Entry
+                                </button>
+                                <div class="dropdown-menu w-100">
+                                    <a class="dropdown-item" href="{% url 'entry_create' %}?type=income">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-down-right text-success me-2" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                            <path d="M7 7l10 10"></path>
+                                            <path d="M17 8l0 9l-9 0"></path>
+                                        </svg>
+                                        Add Income
+                                    </a>
+                                    <a class="dropdown-item" href="{% url 'entry_create' %}?type=expense">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-up-right text-danger me-2" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                            <path d="M17 7l-10 10"></path>
+                                            <path d="M8 7l9 0l0 9"></path>
+                                        </svg>
+                                        Add Expense
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-4">
+                            <a href="{% url 'entry_list' %}" class="btn btn-outline-primary w-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-list" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                    <path d="M9 6l11 0"></path>
+                                    <path d="M9 12l11 0"></path>
+                                    <path d="M9 18l11 0"></path>
+                                    <path d="M5 6l0 .01"></path>
+                                    <path d="M5 12l0 .01"></path>
+                                    <path d="M5 18l0 .01"></path>
+                                </svg>
+                                View All Entries
+                            </a>
+                        </div>
+                        <div class="col-sm-6 col-lg-4">
+                            <a href="{% url 'category_list' %}" class="btn btn-outline-primary w-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-category" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                    <path d="M4 4h6v6h-6z"></path>
+                                    <path d="M14 4h6v6h-6z"></path>
+                                    <path d="M4 14h6v6h-6z"></path>
+                                    <path d="M14 14h6v6h-6z"></path>
+                                </svg>
+                                Manage Categories
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row row-deck row-cards mb-4">
+        {% if user.profile.is_salaried %}
+        <!-- Salary Information -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Salary Information</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="subheader">Gross Salary</div>
+                                        <div class="ms-auto">
+                                            <span class="badge bg-primary">{{ user.profile.salary_frequency|title }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="h1 mb-3">₹{{ user.profile.salary_amount|floatformat:2 }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="subheader">Net Salary</div>
+                                        <div class="ms-auto">
+                                            <span class="badge bg-success">{{ user.profile.salary_frequency|title }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="h1 mb-3">₹{{ user.profile.get_net_salary|floatformat:2 }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="subheader">Daily Budget</div>
+                                        <div class="ms-auto">
+                                            <span class="badge bg-info">Daily</span>
+                                        </div>
+                                    </div>
+                                    <div class="h1 mb-3">₹{{ user.profile.get_daily_budget|floatformat:2 }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="subheader">Next Salary</div>
+                                        <div class="ms-auto">
+                                            <span class="badge bg-warning">Due</span>
+                                        </div>
+                                    </div>
+                                    <div class="h1 mb-3">{{ user.profile.get_salary_date|date:"d M Y" }}</div>
+                                    <div class="progress progress-sm">
+                                        <div class="progress-bar bg-warning" style="width: 100%"></div>
+                                    </div>
+                                    <small class="text-muted">Days until next salary</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="subheader">Total Income</div>
+                        <div class="ms-auto">
+                            <span class="badge bg-success">Monthly</span>
+                        </div>
+                    </div>
+                    <div class="h1 mb-3">₹{{ total_income|floatformat:2 }}</div>
+                    <div class="progress progress-sm">
+                        <div class="progress-bar bg-success" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="subheader">Total Expenses</div>
+                        <div class="ms-auto">
+                            <span class="badge bg-danger">Monthly</span>
+                        </div>
+                    </div>
+                    <div class="h1 mb-3">₹{{ total_expenses|floatformat:2 }}</div>
+                    <div class="progress progress-sm">
+                        <div class="progress-bar bg-danger" style="width: {{ budget_utilization|min_value:100 }}%"></div>
+                    </div>
+                    <small class="text-muted">Budget Utilization: {{ budget_utilization|floatformat:1 }}%</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="subheader">Current Balance</div>
+                        <div class="ms-auto">
+                            <span class="badge {% if current_balance >= 0 %}bg-success{% else %}bg-danger{% endif %}">Monthly</span>
+                        </div>
+                    </div>
+                    <div class="h1 mb-3">₹{{ current_balance|floatformat:2 }}</div>
+                    <div class="progress progress-sm">
+                        <div class="progress-bar {% if current_balance >= 0 %}bg-success{% else %}bg-danger{% endif %}" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="subheader">Savings Rate</div>
+                        <div class="ms-auto">
+                            <span class="badge {% if savings_rate >= 20 %}bg-success{% elif savings_rate >= 10 %}bg-warning{% else %}bg-danger{% endif %}">Monthly</span>
+                        </div>
+                    </div>
+                    <div class="h1 mb-3">{{ savings_rate|floatformat:1 }}%</div>
+                    <div class="progress progress-sm">
+                        <div class="progress-bar {% if savings_rate >= 20 %}bg-success{% elif savings_rate >= 10 %}bg-warning{% else %}bg-danger{% endif %}" style="width: {{ savings_progress|min_value:100 }}%"></div>
+                    </div>
+                    <small class="text-muted">Target Progress: {{ savings_progress|floatformat:1 }}%</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row row-deck row-cards mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Income vs Expenses</h3>
+                    <div class="card-actions">
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-primary active" data-period="6m">6M</button>
+                            <button class="btn btn-sm btn-outline-primary" data-period="3m">3M</button>
+                            <button class="btn btn-sm btn-outline-primary" data-period="1m">1M</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="incomeExpensesChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Category Distribution</h3>
+                    <div class="card-actions">
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-primary active" data-type="expense">Expenses</button>
+                            <button class="btn btn-sm btn-outline-primary" data-type="income">Income</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="categoryChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Savings Trend -->
+    <div class="row row-deck row-cards mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Savings Trend</h3>
+                    <div class="card-actions">
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-primary active" data-period="6m">6M</button>
+                            <button class="btn btn-sm btn-outline-primary" data-period="3m">3M</button>
+                            <button class="btn btn-sm btn-outline-primary" data-period="1m">1M</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="savingsTrendChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Categories -->
+    <div class="row row-deck row-cards mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Top Categories</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for category in top_categories %}
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="subheader">{{ category.name }}</div>
+                                        <div class="ms-auto">
+                                            <span class="badge {% if category.type == 'income' %}bg-success{% else %}bg-danger{% endif %}">
+                                                {{ category.type|title }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="h1 mb-3">₹{{ category.total|floatformat:2 }}</div>
+                                    <div class="progress">
+                                        <div class="progress-bar {% if category.type == 'income' %}bg-success{% else %}bg-danger{% endif %}" 
+                                             role="progressbar" 
+                                             style="width: {{ category.percentage|min_value:100 }}%">
+                                            {{ category.percentage|floatformat:1 }}%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="row row-deck row-cards">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Transactions</h3>
+                    <div class="col-auto ms-auto d-print-none">
+                        <div class="btn-list">
+                            <div class="dropdown">
+                                <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                        <path d="M12 5l0 14"></path>
+                                        <path d="M5 12l14 0"></path>
+                                    </svg>
+                                    Add Entry
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="{% url 'entry_create' %}?type=income">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-down-right text-success me-2" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                            <path d="M7 7l10 10"></path>
+                                            <path d="M17 8l0 9l-9 0"></path>
+                                        </svg>
+                                        Add Income
+                                    </a>
+                                    <a class="dropdown-item" href="{% url 'entry_create' %}?type=expense">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-up-right text-danger me-2" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                            <path d="M17 7l-10 10"></path>
+                                            <path d="M8 7l9 0l0 9"></path>
+                                        </svg>
+                                        Add Expense
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        {% render_table recent_table %}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted">
+                            <small>Last updated: {{ end_date|date:"M d, Y" }}</small>
+                        </div>
+                        <a href="{% url 'entry_list' %}" class="btn btn-outline-primary btn-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-list" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                <path d="M9 6l11 0"></path>
+                                <path d="M9 12l11 0"></path>
+                                <path d="M9 18l11 0"></path>
+                                <path d="M5 6l0 .01"></path>
+                                <path d="M5 12l0 .01"></path>
+                                <path d="M5 18l0 .01"></path>
+                            </svg>
+                            View All Entries
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Chart colors
+    const colors = {
+        income: {
+            main: 'rgb(75, 192, 192)',
+            light: 'rgba(75, 192, 192, 0.2)',
+            dark: 'rgb(60, 154, 154)'
+        },
+        expense: {
+            main: 'rgb(255, 99, 132)',
+            light: 'rgba(255, 99, 132, 0.2)',
+            dark: 'rgb(204, 79, 105)'
+        },
+        savings: {
+            main: 'rgb(54, 162, 235)',
+            light: 'rgba(54, 162, 235, 0.2)',
+            dark: 'rgb(43, 130, 188)'
+        },
+        target: {
+            main: 'rgb(153, 102, 255)',
+            light: 'rgba(153, 102, 255, 0.2)',
+            dark: 'rgb(122, 82, 204)'
+        }
+    };
+
+    // Common chart options
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            mode: 'index',
+            intersect: false
+        },
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 20,
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                    font: {
+                        size: 12
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                padding: 12,
+                titleFont: {
+                    size: 14,
+                    weight: 'bold'
+                },
+                bodyFont: {
+                    size: 13
+                },
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+                borderWidth: 1,
+                displayColors: true,
+                boxPadding: 4
+            }
+        }
+    };
+
+    // Income vs Expenses Chart
+    const monthlyData = {{ monthly_data|safe }};
+    const incomeExpensesChart = new Chart(document.getElementById('incomeExpensesChart'), {
+        type: 'line',
+        data: {
+            labels: monthlyData.map(d => d.month),
+            datasets: [{
+                label: 'Income',
+                data: monthlyData.map(d => d.income),
+                borderColor: colors.income.main,
+                backgroundColor: colors.income.light,
+                tension: 0.4,
+                fill: true,
+                borderWidth: 2,
+                pointBackgroundColor: colors.income.main,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointHoverBackgroundColor: colors.income.dark,
+                pointHoverBorderColor: '#fff',
+                pointHoverBorderWidth: 2
+            }, {
+                label: 'Expenses',
+                data: monthlyData.map(d => d.expenses),
+                borderColor: colors.expense.main,
+                backgroundColor: colors.expense.light,
+                tension: 0.4,
+                fill: true,
+                borderWidth: 2,
+                pointBackgroundColor: colors.expense.main,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointHoverBackgroundColor: colors.expense.dark,
+                pointHoverBorderColor: '#fff',
+                pointHoverBorderWidth: 2
+            }]
+        },
+        options: {
+            ...commonOptions,
+            plugins: {
+                ...commonOptions.plugins,
+                title: {
+                    display: true,
+                    text: '{% if period_type == "year" %}Monthly{% elif period_type == "month" %}Daily{% else %}Hourly{% endif %} Income vs Expenses',
+                    padding: { bottom: 20 },
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
+                },
+                tooltip: {
+                    ...commonOptions.plugins.tooltip,
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.raw;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${context.dataset.label}: ₹${value.toLocaleString()} (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString();
+                        },
+                        padding: 10,
+                        font: {
+                            size: 11
+                        }
+                    },
+                    grid: {
+                        drawBorder: false,
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        padding: 10,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        font: {
+                            size: 11
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Category Distribution Chart
+    const categoryData = {{ category_data|safe }};
+    const categoryChart = new Chart(document.getElementById('categoryChart'), {
+        type: 'doughnut',
+        data: {
+            labels: categoryData.map(d => d.name),
+            datasets: [{
+                data: categoryData.map(d => d.expenses),
+                backgroundColor: [
+                    'rgb(255, 99, 132)',
+                    'rgb(54, 162, 235)',
+                    'rgb(255, 205, 86)',
+                    'rgb(75, 192, 192)',
+                    'rgb(153, 102, 255)',
+                    'rgb(255, 159, 64)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            ...commonOptions,
+            plugins: {
+                ...commonOptions.plugins,
+                title: {
+                    display: true,
+                    text: 'Category Distribution',
+                    padding: { bottom: 10 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.raw;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${context.label}: ₹${value.toLocaleString()} (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            cutout: '60%'
+        }
+    });
+
+    // Savings Trend Chart
+    const savingsTrend = {{ savings_trend|safe }};
+    const savingsTrendChart = new Chart(document.getElementById('savingsTrendChart'), {
+        type: 'bar',
+        data: {
+            labels: savingsTrend.map(d => d.month),
+            datasets: [{
+                label: 'Actual Savings',
+                data: savingsTrend.map(d => d.savings),
+                backgroundColor: colors.savings.main,
+                borderRadius: 4,
+                borderWidth: 0,
+                barPercentage: 0.6,
+                categoryPercentage: 0.8,
+                hoverBackgroundColor: colors.savings.dark
+            }, {
+                label: 'Target',
+                data: savingsTrend.map(d => d.target),
+                type: 'line',
+                borderColor: colors.target.main,
+                backgroundColor: colors.target.light,
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: colors.target.main,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointHoverBackgroundColor: colors.target.dark,
+                pointHoverBorderColor: '#fff',
+                pointHoverBorderWidth: 2
+            }]
+        },
+        options: {
+            ...commonOptions,
+            plugins: {
+                ...commonOptions.plugins,
+                title: {
+                    display: true,
+                    text: '{% if period_type == "year" %}Monthly{% elif period_type == "month" %}Daily{% else %}Hourly{% endif %} Savings vs Target',
+                    padding: { bottom: 20 },
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
+                },
+                tooltip: {
+                    ...commonOptions.plugins.tooltip,
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.raw;
+                            const target = context.dataset.label === 'Target' ? value : savingsTrend[context.dataIndex].target;
+                            const percentage = context.dataset.label === 'Target' ? 100 : ((value / target) * 100).toFixed(1);
+                            return `${context.dataset.label}: ₹${value.toLocaleString()} ${context.dataset.label === 'Actual Savings' ? `(${percentage}% of target)` : ''}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString();
+                        },
+                        padding: 10,
+                        font: {
+                            size: 11
+                        }
+                    },
+                    grid: {
+                        drawBorder: false,
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        padding: 10,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        font: {
+                            size: 11
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Chart period buttons
+    document.querySelectorAll('[data-period]').forEach(button => {
+        button.addEventListener('click', function() {
+            const period = this.dataset.period;
+            const months = period === '6m' ? 6 : period === '3m' ? 3 : 1;
+            
+            // Update active state
+            this.parentElement.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Update charts with new data
+            const filteredData = monthlyData.slice(-months);
+            incomeExpensesChart.data.labels = filteredData.map(d => d.month);
+            incomeExpensesChart.data.datasets[0].data = filteredData.map(d => d.income);
+            incomeExpensesChart.data.datasets[1].data = filteredData.map(d => d.expenses);
+            incomeExpensesChart.update();
+            
+            const filteredSavings = savingsTrend.slice(-months);
+            savingsTrendChart.data.labels = filteredSavings.map(d => d.month);
+            savingsTrendChart.data.datasets[0].data = filteredSavings.map(d => d.savings);
+            savingsTrendChart.data.datasets[1].data = filteredSavings.map(d => d.target);
+            savingsTrendChart.update();
+        });
+    });
+
+    // Category type buttons
+    document.querySelectorAll('[data-type]').forEach(button => {
+        button.addEventListener('click', function() {
+            const type = this.dataset.type;
+            
+            // Update active state
+            this.parentElement.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Update chart with new data
+            categoryChart.data.datasets[0].data = categoryData.map(d => d[type]);
+            categoryChart.update();
+        });
+    });
+});
+</script>
+{% endblock %} 

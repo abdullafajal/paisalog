@@ -1,0 +1,126 @@
+{% load static menu_generator %}
+{% get_menu "NAV_MENU" as menu %}
+<style>
+  /* Custom Light and Dark Color Variables */
+  :root {
+    --custom-color-light: rgb(255, 255, 255);
+    /* Light Theme Color */
+  }
+
+  [data-bs-theme="dark"] {
+    --custom-color-light: rgba(19, 26, 40, 0.94);
+    /* Dark Theme Color */
+  }
+
+  /* Header Sticky Class */
+ 
+
+  /* Mobile Logo Centering */
+  @media (max-width: 767.98px) {
+    .navbar-brand {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      margin: 0;
+    }
+    .navbar-brand img {
+      width: 90px;
+      height: auto;
+    }
+    .navbar-toggler {
+      position: relative;
+      z-index: 1;
+    }
+    .navbar-collapse {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background-color: var(--custom-color-light);
+      padding: 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+  }
+</style>
+
+<header class="navbar navbar-expand-md d-print-none header-sticky sticky-top" style="z-index: 9999;">
+  <div class="container-xl">
+    <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu"
+      aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <h1 class="navbar-brand navbar-brand-autodark pe-0 pe-md-3">
+      <a href="{% url 'dashboard' %}">
+        <img src="{% static 'img/paisalog.png' %}" width="110" height="15" alt="logo" class="navbar-brand-image">
+      </a>
+    </h1>
+    
+    <div class="navbar-nav flex-row order-md-last">
+      {% if user.is_authenticated %}
+      <div class="nav-item dropdown ms-2">
+        <a href="#" class="nav-link d-flex lh-1 text-reset" data-bs-toggle="dropdown" aria-label="Open user menu">
+          <span class="avatar avatar-md">{% if user.first_name and user.last_name %}{{user.first_name|first}}{{user.last_name|first}}{% else %}{{user.username|first}}{% endif %}</span>
+          <div class="d-none d-xl-block ps-2">
+            <div>{{ user.get_full_name|default:user.username }}</div>
+            <div class="mt-1 small text-secondary">{{ user.email }}</div>
+          </div>
+        </a>
+        <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+          <a href="{% url 'profile_update' %}" class="dropdown-item">Profile</a>
+          <div class="dropdown-divider"></div>
+          <form method="post" action="{% url 'logout' %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="dropdown-item">Logout</button>
+          </form>
+        </div>
+      </div>
+      {% else %}
+      <div class="nav-item">
+        <a href="{% url 'login' %}" class="btn btn-ghost-primary me-2">Login</a>
+      </div>
+      <div class="nav-item">
+        <a href="{% url 'signup' %}" class="btn btn-primary">Sign Up</a>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="collapse navbar-collapse" id="navbar-menu">
+      <ul class="navbar-nav">
+        {% for item in menu %}
+        <li class="nav-item {% if item.submenu %}dropdown{% endif %} {% if item.selected %}active{% endif %}">
+          <a class="nav-link 
+            {% if item.submenu %}
+            dropdown-toggle
+            {% endif %}" href="{{ item.url }}" {% if item.submenu %} data-bs-toggle="dropdown"
+            data-bs-auto-close="outside" role="button" aria-expanded="false" {% endif %}>
+            <span class="nav-link-icon d-md-none d-lg-inline-block">
+              {{ item.icon_class|safe }}
+            </span>
+            <span class="nav-link-title">
+              {{ item.name }}
+            </span>
+          </a>
+
+          {% if item.submenu %}
+          <div class="dropdown-menu">
+            <div class="dropdown-menu-columns">
+              <div class="dropdown-menu-column">
+                {% for subitem in item.submenu %}
+                <a class="dropdown-item {% if subitem.selected %}active{% endif %} d-flex align-items-center hover-bg-primary text-hover-white"
+                  href="{{ subitem.url }}">
+                  <div class="text-primary me-2">
+                    {{ subitem.icon_class|safe }}
+                  </div>
+                  <span class="hover-underline">{{ subitem.name }}</span>
+                </a>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</header>
