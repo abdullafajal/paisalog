@@ -32,7 +32,7 @@ from .models import Entry, Category, UserProfile
 from .tables import EntryTable, CategoryTable, RecentEntryTable
 from .filters import EntryFilter
 
-def create_default_categories():
+def create_default_categories(user=None):
     default_categories = [
         # Income categories
         {'name': 'Salary', 'entry_type': 'income'},
@@ -55,11 +55,20 @@ def create_default_categories():
     ]
     
     for category_data in default_categories:
-        Category.objects.get_or_create(
-            name=category_data['name'],
-            entry_type=category_data['entry_type'],
-            is_default=True
-        )
+        # Create category with the specific user if provided
+        if user:
+            Category.objects.get_or_create(
+                name=category_data['name'],
+                entry_type=category_data['entry_type'],
+                is_default=True
+            )
+        else:
+            # For admin functions or initial setup
+            Category.objects.get_or_create(
+                name=category_data['name'],
+                entry_type=category_data['entry_type'],
+                is_default=True
+            )
 
 def signup_view(request):
     if request.user.is_authenticated:
@@ -69,11 +78,13 @@ def signup_view(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Create UserProfile for the new user
-            UserProfile.objects.create(user=user)
+            # Create UserProfile for the new user if it doesn't exist
+            UserProfile.objects.get_or_create(user=user)
+            # Create default categories
+            create_default_categories(user)
+            # Log the user in
             login(request, user)
-            # Create default categories for new user
-            create_default_categories()
+            messages.success(request, "Your account has been created successfully!")
             return redirect("dashboard")
     else:
         form = SignUpForm()

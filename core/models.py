@@ -70,6 +70,7 @@ class UserProfile(models.Model):
         default='monthly'
     )
     salary_currency = models.CharField(max_length=3, default='INR')
+    currency_symbol = models.CharField(max_length=5, default='₹')
     salary_deductions = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Monthly deductions like tax, PF, etc.")
     salary_allowances = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Monthly allowances like HRA, DA, etc.")
 
@@ -108,11 +109,13 @@ class UserProfile(models.Model):
 def create_user_profile(sender, instance, created, **kwargs):
     """Create a UserProfile instance for new users"""
     if created:
-        UserProfile.objects.create(user=instance)
+        UserProfile.objects.get_or_create(user=instance)
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     """Save the UserProfile instance when the user is saved"""
-    if not hasattr(instance, 'profile'):
+    try:
+        instance.profile.save()
+    except UserProfile.DoesNotExist:
+        # Create profile if it doesn't exist
         UserProfile.objects.create(user=instance)
-    instance.profile.save()
