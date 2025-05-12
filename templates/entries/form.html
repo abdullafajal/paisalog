@@ -145,8 +145,9 @@
                     <!-- Date -->
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">Date & Time</label>
                             {{ form.date }}
+                            <small id="dateTimeDisplay" class="form-text text-muted mt-1"></small>
                             {% if form.date.errors %}
                             <div class="error-message">{{ form.date.errors.0 }}</div>
                             {% endif %}
@@ -219,4 +220,58 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Format the current date and time for the datetime-local input
+        const dateTimeInput = document.querySelector('input[type="datetime-local"]');
+        const dateTimeDisplay = document.getElementById('dateTimeDisplay');
+        
+        // Function to format date in 12-hour format
+        function formatDate12Hour(dateString) {
+            if (!dateString) return '';
+            
+            const date = new Date(dateString);
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const month = months[date.getMonth()];
+            const day = date.getDate();
+            const year = date.getFullYear();
+            
+            let hours = date.getHours();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            
+            return `${month} ${day}, ${year} ${hours}:${minutes} ${ampm}`;
+        }
+        
+        // Function to update the display
+        function updateDateTimeDisplay() {
+            if (dateTimeInput && dateTimeInput.value) {
+                dateTimeDisplay.textContent = formatDate12Hour(dateTimeInput.value);
+            }
+        }
+        
+        if (dateTimeInput) {
+            // Don't set a default value - we'll use the server-provided value
+            // which is already correctly converted to local timezone
+            
+            // Update the 12-hour display initially
+            updateDateTimeDisplay();
+            
+            // Update the display whenever the input changes
+            dateTimeInput.addEventListener('change', updateDateTimeDisplay);
+            
+            // Ensure the input works properly on all browsers
+            dateTimeInput.addEventListener('click', function() {
+                if (this.type !== 'datetime-local') {
+                    this.type = 'datetime-local';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

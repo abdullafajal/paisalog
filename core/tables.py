@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 
 class EntryTable(tables.Table):
     amount = tables.Column(verbose_name='Amount', empty_values=())
-    date = tables.DateColumn(format="M d, Y")
+    date = tables.DateTimeColumn(format="M d, Y h:i A")
     entry_type = tables.Column(verbose_name='Type', empty_values=())
     amount_type = tables.Column(verbose_name='Payment')
     actions = tables.TemplateColumn(
@@ -50,7 +50,7 @@ class EntryTable(tables.Table):
 
 class RecentEntryTable(tables.Table):
     amount = tables.Column(verbose_name='Amount', empty_values=())
-    date = tables.DateColumn(format="M d, Y")
+    date = tables.DateTimeColumn(format="M d, Y h:i A")
     entry_type = tables.Column(verbose_name='Type', empty_values=())
     amount_type = tables.Column(verbose_name='Payment')
 

@@ -39,7 +39,7 @@ class Entry(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    date = models.DateField()
+    date = models.DateTimeField(default=timezone.now)
     description = models.TextField(blank=True)
     entry_type = models.CharField(max_length=10, choices=ENTRY_TYPES)
     amount_type = models.CharField(max_length=10, choices=AMOUNT_TYPES)

@@ -17,7 +17,7 @@ from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
-from datetime import timedelta
+from datetime import timedelta, datetime
 import json
 from django_tables2.export.export import TableExport
 from django_tables2 import SingleTableMixin
@@ -112,10 +112,14 @@ def dashboard(request):
     else:  # day
         start_date = end_date - timedelta(days=1)
 
-    # Get user's entries
+    # Convert date range to timezone-aware datetime objects
+    start_datetime = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
+    end_datetime = timezone.make_aware(datetime.combine(end_date, datetime.max.time()))
+
+    # Get user's entries with proper timezone handling
     user_entries = Entry.objects.filter(
         user=request.user,
-        date__range=[start_date, end_date]
+        date__range=[start_datetime, end_datetime]
     )
 
     # Calculate totals
@@ -167,7 +171,17 @@ def dashboard(request):
     # Monthly data for income vs expenses
     current_date = start_date
     while current_date <= end_date:
-        month_entries = user_entries.filter(date__month=current_date.month, date__year=current_date.year)
+        # Calculate first and last day of the month
+        month_start = current_date.replace(day=1)
+        next_month = (month_start.replace(day=28) + timedelta(days=4)).replace(day=1)
+        month_end = next_month - timedelta(days=1)
+        
+        # Use date range filtering instead of date__month and date__year
+        month_entries = user_entries.filter(
+            date__gte=timezone.make_aware(datetime.combine(month_start, datetime.min.time())),
+            date__lte=timezone.make_aware(datetime.combine(month_end, datetime.max.time()))
+        )
+        
         month_income = month_entries.filter(entry_type='income').aggregate(total=Sum('amount'))['total'] or 0
         month_expenses = month_entries.filter(entry_type='expense').aggregate(total=Sum('amount'))['total'] or 0
         
@@ -186,7 +200,8 @@ def dashboard(request):
             'target': target_savings
         })
         
-        current_date = (current_date.replace(day=1) + timedelta(days=32)).replace(day=1)
+        # Move to the next month
+        current_date = next_month
 
     # Category distribution data
     for category in Category.objects.filter(
@@ -228,7 +243,8 @@ def dashboard(request):
 
     expenses_by_day = {}
     for entry in user_entries.filter(entry_type='expense'):
-        day_of_week = entry.date.strftime('%A')
+        # Use the date field converted to timezone-aware date for day of week
+        day_of_week = timezone.localtime(entry.date).strftime('%A')
         if day_of_week not in expenses_by_day:
             expenses_by_day[day_of_week] = 0
         expenses_by_day[day_of_week] += float(entry.amount)
@@ -244,7 +260,12 @@ def dashboard(request):
     transaction_count_data = []
     current_date = start_date
     while current_date <= end_date:
-        day_entries = user_entries.filter(date=current_date)
+        # Create timezone-aware datetime objects for the start and end of the day
+        day_start = timezone.make_aware(datetime.combine(current_date, datetime.min.time()))
+        day_end = timezone.make_aware(datetime.combine(current_date, datetime.max.time()))
+        
+        # Filter entries for the current day
+        day_entries = user_entries.filter(date__gte=day_start, date__lte=day_end)
         day_income_count = day_entries.filter(entry_type='income').count()
         day_expense_count = day_entries.filter(entry_type='expense').count()
         

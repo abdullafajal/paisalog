@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django import template
 from .models import Entry, Category, UserProfile
 from django.db import models
+from django.utils import timezone
+
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(max_length=254, required=True)
@@ -19,7 +21,10 @@ class EntryForm(forms.ModelForm):
         model = Entry
         fields = ['entry_type', 'amount', 'category', 'date', 'description', 'amount_type']
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'date': forms.DateTimeInput(
+                attrs={'type': 'datetime-local', 'class': 'form-control'},
+                format='%Y-%m-%dT%H:%M'
+            ),
             'description': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'amount_type': forms.Select(attrs={'class': 'form-control'}),
@@ -30,6 +35,12 @@ class EntryForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
+        
+        # Set initial date to current datetime in local timezone
+        if not self.instance.pk:
+            # Use localtime to convert to the user's timezone
+            local_now = timezone.localtime(timezone.now())
+            self.initial['date'] = local_now.strftime('%Y-%m-%dT%H:%M')
         
         # Get entry type from URL parameter for new entries
         if not self.instance.pk and self.request:
@@ -47,6 +58,12 @@ class EntryForm(forms.ModelForm):
                 models.Q(user=self.request.user) | models.Q(is_default=True),
                 entry_type=self.instance.entry_type
             )
+            
+            # Format the date for the datetime-local input using local timezone
+            if self.instance.date:
+                # Convert the stored UTC time to local time
+                local_date = timezone.localtime(self.instance.date)
+                self.initial['date'] = local_date.strftime('%Y-%m-%dT%H:%M')
 
     def clean(self):
         cleaned_data = super().clean()
@@ -58,6 +75,12 @@ class EntryForm(forms.ModelForm):
                 raise forms.ValidationError(
                     "Selected category does not match the entry type."
                 )
+                
+        # Ensure the date is timezone-aware and in UTC
+        date = cleaned_data.get('date')
+        if date and timezone.is_naive(date):
+            # Convert naive datetime to the current timezone
+            cleaned_data['date'] = timezone.make_aware(date)
 
         return cleaned_data
 
