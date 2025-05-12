@@ -43,6 +43,9 @@ class EntryTable(tables.Table):
                 'class': 'thead-light'
             }
         }
+        row_attrs = {
+            'class': lambda record: 'row-bg-success' if record.entry_type == 'income' else 'row-bg-danger'
+        }
 
 
 class RecentEntryTable(tables.Table):
@@ -77,6 +80,9 @@ class RecentEntryTable(tables.Table):
                 'class': 'thead-light'
             }
         }
+        row_attrs = {
+            'class': lambda record: 'row-bg-success' if record.entry_type == 'income' else 'row-bg-danger'
+        }
         orderable = False
 
 class CategoryTable(tables.Table):
@@ -108,5 +114,8 @@ class CategoryTable(tables.Table):
             'thead': {
                 'class': 'thead-light'
             }
+        }
+        row_attrs = {
+            'class': lambda record: 'row-bg-success' if record.entry_type == 'income' else 'row-bg-danger'
         }
         order_by = ('name',)

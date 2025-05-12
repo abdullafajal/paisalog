@@ -103,6 +103,32 @@
         .row-bg-danger {
             background-color: #fff2f2;
         }
+        
+        /* Pagination styles */
+        .pagination-rounded .page-link {
+            border-radius: 50% !important;
+            margin: 0 3px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #206bc4;
+            border-color: #206bc4;
+            color: white;
+        }
+        .pagination .page-link {
+            color: #206bc4;
+            border: 1px solid #dee2e6;
+        }
+        .pagination .page-link:hover {
+            background-color: #e9ecef;
+        }
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+        }
     </style>
     {% block extra_css %}{% endblock %}
   </head>

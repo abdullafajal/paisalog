@@ -24,6 +24,8 @@ from django_tables2 import SingleTableMixin
 from django.views.decorators.cache import cache_control
 from django.conf import settings
 import os
+from django.core.paginator import Paginator
+from django_tables2.paginators import LazyPaginator
 
 from .forms import SignUpForm, EntryForm, CategoryForm, UserProfileForm
 from .models import Entry, Category, UserProfile
@@ -288,6 +290,7 @@ class EntryListView(LoginRequiredMixin, ExportMixin, FilterView, SingleTableView
     template_name = 'entries/list.html'
     paginate_by = 10
     export_formats = ['csv', 'xlsx']
+    paginator_class = LazyPaginator
 
     def get_queryset(self):
         return Entry.objects.filter(user=self.request.user)
@@ -350,6 +353,8 @@ class CategoryListView(LoginRequiredMixin, SingleTableView):
     table_class = CategoryTable
     template_name = 'categories/list.html'
     context_object_name = 'object_list'
+    paginate_by = 10
+    paginator_class = LazyPaginator
 
     def get_queryset(self):
         return Category.objects.filter(
@@ -359,7 +364,6 @@ class CategoryListView(LoginRequiredMixin, SingleTableView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         table = self.get_table(**self.get_table_kwargs())
-        RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
         context['table'] = table
         return context
 
