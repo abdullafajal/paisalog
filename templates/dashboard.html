@@ -253,6 +253,80 @@
         </div>
     </div>
 
+    <!-- Payment Method Distribution -->
+    <div class="row row-deck row-cards mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Payment Method Distribution</h3>
+                </div>
+                <div class="card-body p-3">
+                    <canvas id="paymentMethodChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Spending Metrics -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Spending Metrics</h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="subheader">Average Daily Expense</div>
+                        <div class="ms-auto">
+                            <span class="badge bg-info">Daily</span>
+                        </div>
+                    </div>
+                    <div class="h2 mb-4">₹{{ avg_daily_expense|floatformat:2 }}</div>
+                    
+                    <div class="d-flex align-items-center mt-4">
+                        <div class="subheader">Highest Spending Day</div>
+                        <div class="ms-auto">
+                            <span class="badge bg-warning">{{ highest_spending_day.0 }}</span>
+                        </div>
+                    </div>
+                    <div class="h2 mb-3">₹{{ highest_spending_day.1|floatformat:2 }}</div>
+                    <div class="progress progress-sm">
+                        <div class="progress-bar bg-warning" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Transaction Count -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Transaction Count</h3>
+                </div>
+                <div class="card-body p-3">
+                    <div class="row g-2 pb-1">
+                        <div class="col-4 text-center">
+                            <div class="subheader text-success">Income</div>
+                            <div class="h3 mb-0">{{ income_count }}</div>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="subheader text-danger">Expense</div>
+                            <div class="h3 mb-0">{{ expense_count }}</div>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="subheader text-primary">Total</div>
+                            <div class="h3 mb-0">{{ total_count }}</div>
+                        </div>
+                    </div>
+                    <div class="divider my-2">
+                        <span class="text-muted small">Daily Transactions</span>
+                    </div>
+                    <div style="height:90px">
+                        <canvas id="transactionCountChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Charts -->
     <div class="row row-deck row-cards mb-4">
         <div class="col-md-8">
@@ -267,8 +341,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <canvas id="incomeExpensesChart" height="300"></canvas>
+                <div class="card-body p-3">
+                    <canvas id="incomeExpensesChart" height="250"></canvas>
                 </div>
             </div>
         </div>
@@ -283,8 +357,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <canvas id="categoryChart" height="250"></canvas>
+                <div class="card-body p-3">
+                    <canvas id="categoryChart" height="200"></canvas>
                 </div>
             </div>
         </div>
@@ -304,8 +378,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <canvas id="savingsTrendChart" height="300"></canvas>
+                <div class="card-body p-3">
+                    <canvas id="savingsTrendChart" height="250"></canvas>
                 </div>
             </div>
         </div>
@@ -459,28 +533,28 @@ document.addEventListener('DOMContentLoaded', function() {
             legend: {
                 position: 'bottom',
                 labels: {
-                    padding: 20,
+                    padding: 15,
                     usePointStyle: true,
                     pointStyle: 'circle',
                     font: {
-                        size: 12
+                        size: 11
                     }
                 }
             },
             tooltip: {
                 backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                padding: 12,
+                padding: 10,
                 titleFont: {
-                    size: 14,
+                    size: 13,
                     weight: 'bold'
                 },
                 bodyFont: {
-                    size: 13
+                    size: 12
                 },
                 borderColor: 'rgba(255, 255, 255, 0.1)',
                 borderWidth: 1,
                 displayColors: true,
-                boxPadding: 4
+                boxPadding: 3
             }
         }
     };
@@ -501,9 +575,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 borderWidth: 2,
                 pointBackgroundColor: colors.income.main,
                 pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6,
+                pointBorderWidth: 1,
+                pointRadius: 3,
+                pointHoverRadius: 5,
                 pointHoverBackgroundColor: colors.income.dark,
                 pointHoverBorderColor: '#fff',
                 pointHoverBorderWidth: 2
@@ -517,9 +591,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 borderWidth: 2,
                 pointBackgroundColor: colors.expense.main,
                 pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6,
+                pointBorderWidth: 1,
+                pointRadius: 3,
+                pointHoverRadius: 5,
                 pointHoverBackgroundColor: colors.expense.dark,
                 pointHoverBorderColor: '#fff',
                 pointHoverBorderWidth: 2
@@ -532,9 +606,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 title: {
                     display: true,
                     text: '{% if period_type == "year" %}Monthly{% elif period_type == "month" %}Daily{% else %}Hourly{% endif %} Income vs Expenses',
-                    padding: { bottom: 20 },
+                    padding: { bottom: 15 },
                     font: {
-                        size: 16,
+                        size: 14,
                         weight: 'bold'
                     }
                 },
@@ -586,12 +660,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Category Distribution Chart
     const categoryData = {{ category_data|safe }};
+    
+    // Filter expense and income data separately
+    const expenseCategories = categoryData.filter(item => item.expenses > 0);
+    const incomeCategories = categoryData.filter(item => item.income > 0);
+    
+    // Initialize with expense data by default
     const categoryChart = new Chart(document.getElementById('categoryChart'), {
         type: 'doughnut',
         data: {
-            labels: categoryData.map(d => d.name),
+            labels: expenseCategories.map(d => d.name),
             datasets: [{
-                data: categoryData.map(d => d.expenses),
+                data: expenseCategories.map(d => d.expenses),
                 backgroundColor: [
                     'rgb(255, 99, 132)',
                     'rgb(54, 162, 235)',
@@ -604,15 +684,38 @@ document.addEventListener('DOMContentLoaded', function() {
             }]
         },
         options: {
-            ...commonOptions,
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
             plugins: {
-                ...commonOptions.plugins,
-                title: {
-                    display: true,
-                    text: 'Category Distribution',
-                    padding: { bottom: 10 }
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: {
+                            size: 11
+                        }
+                    }
                 },
                 tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 10,
+                    titleFont: {
+                        size: 13,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 12
+                    },
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    displayColors: true,
+                    boxPadding: 3,
                     callbacks: {
                         label: function(context) {
                             const value = context.raw;
@@ -621,6 +724,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             return `${context.label}: ₹${value.toLocaleString()} (${percentage}%)`;
                         }
                     }
+                },
+                title: {
+                    display: true,
+                    text: 'Expense Categories',
+                    padding: { bottom: 10 }
                 }
             },
             cutout: '60%'
@@ -637,10 +745,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 label: 'Actual Savings',
                 data: savingsTrend.map(d => d.savings),
                 backgroundColor: colors.savings.main,
-                borderRadius: 4,
+                borderRadius: 3,
                 borderWidth: 0,
                 barPercentage: 0.6,
-                categoryPercentage: 0.8,
+                categoryPercentage: 0.7,
                 hoverBackgroundColor: colors.savings.dark
             }, {
                 label: 'Target',
@@ -653,9 +761,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 tension: 0.4,
                 pointBackgroundColor: colors.target.main,
                 pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6,
+                pointBorderWidth: 1,
+                pointRadius: 3,
+                pointHoverRadius: 5,
                 pointHoverBackgroundColor: colors.target.dark,
                 pointHoverBorderColor: '#fff',
                 pointHoverBorderWidth: 2
@@ -668,9 +776,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 title: {
                     display: true,
                     text: '{% if period_type == "year" %}Monthly{% elif period_type == "month" %}Daily{% else %}Hourly{% endif %} Savings vs Target',
-                    padding: { bottom: 20 },
+                    padding: { bottom: 15 },
                     font: {
-                        size: 16,
+                        size: 14,
                         weight: 'bold'
                     }
                 },
@@ -745,7 +853,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Category type buttons
+    // Category type buttons - completely rewritten
     document.querySelectorAll('[data-type]').forEach(button => {
         button.addEventListener('click', function() {
             const type = this.dataset.type;
@@ -754,10 +862,189 @@ document.addEventListener('DOMContentLoaded', function() {
             this.parentElement.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
             
+            // Get the appropriate data based on type
+            let chartData, chartLabels, titleText;
+            
+            if (type === 'income') {
+                chartData = incomeCategories.map(d => d.income);
+                chartLabels = incomeCategories.map(d => d.name);
+                titleText = 'Income Categories';
+            } else {
+                chartData = expenseCategories.map(d => d.expenses);
+                chartLabels = expenseCategories.map(d => d.name);
+                titleText = 'Expense Categories';
+            }
+            
             // Update chart with new data
-            categoryChart.data.datasets[0].data = categoryData.map(d => d[type]);
+            categoryChart.data.labels = chartLabels;
+            categoryChart.data.datasets[0].data = chartData;
+            categoryChart.options.plugins.title.text = titleText;
+            
+            // Redraw the chart
             categoryChart.update();
         });
+    });
+
+    // Payment Method Distribution Chart
+    const paymentMethodData = {{ payment_method_data|safe }};
+    const paymentMethodChart = new Chart(document.getElementById('paymentMethodChart'), {
+        type: 'pie',
+        data: {
+            labels: paymentMethodData.map(d => d.method),
+            datasets: [{
+                data: paymentMethodData.map(d => d.amount),
+                backgroundColor: [
+                    'rgb(54, 162, 235)',  // Blue for Online
+                    'rgb(255, 205, 86)'   // Yellow for Cash
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    displayColors: true,
+                    boxPadding: 4,
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.raw;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${context.label}: ₹${value.toLocaleString()} (${percentage}%)`;
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Payment Method Distribution',
+                    padding: { bottom: 10 }
+                }
+            }
+        }
+    });
+
+    // Transaction Count Chart
+    const transactionCountData = {{ transaction_count_data|safe }};
+    const transactionCountChart = new Chart(document.getElementById('transactionCountChart'), {
+        type: 'line',
+        data: {
+            labels: transactionCountData.map(d => d.date),
+            datasets: [{
+                label: 'Income',
+                data: transactionCountData.map(d => d.income),
+                borderColor: colors.income.main,
+                backgroundColor: colors.income.light,
+                borderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                tension: 0.4,
+                fill: false
+            }, {
+                label: 'Expense',
+                data: transactionCountData.map(d => d.expense),
+                borderColor: colors.expense.main,
+                backgroundColor: colors.expense.light,
+                borderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                tension: 0.4,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    align: 'end',
+                    labels: {
+                        padding: 8,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        boxWidth: 6,
+                        font: {
+                            size: 9
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 6,
+                    titleFont: {
+                        size: 10,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 9
+                    },
+                    titleMarginBottom: 4,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    displayColors: true,
+                    boxPadding: 2
+                },
+                title: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        precision: 0,
+                        font: {
+                            size: 9
+                        },
+                        padding: 0
+                    },
+                    grid: {
+                        display: false
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        display: false
+                    }
+                }
+            }
+        }
     });
 });
 </script>

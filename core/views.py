@@ -198,6 +198,63 @@ def dashboard(request):
                 'income': float(category_total) if category.entry_type == 'income' else 0
             })
 
+    # Payment Method Distribution data
+    payment_method_data = []
+    cash_total = user_entries.filter(amount_type='cash', entry_type='expense').aggregate(total=Sum('amount'))['total'] or 0
+    online_total = user_entries.filter(amount_type='online', entry_type='expense').aggregate(total=Sum('amount'))['total'] or 0
+    
+    if cash_total > 0:
+        payment_method_data.append({
+            'method': 'Cash',
+            'amount': float(cash_total)
+        })
+    
+    if online_total > 0:
+        payment_method_data.append({
+            'method': 'Online',
+            'amount': float(online_total)
+        })
+    
+    # Spending Metrics
+    avg_daily_expense = 0
+    if period_type == 'year':
+        avg_daily_expense = total_expenses / 365 if total_expenses > 0 else 0
+    elif period_type == 'month':
+        avg_daily_expense = total_expenses / 30 if total_expenses > 0 else 0
+    else:  # day
+        avg_daily_expense = total_expenses
+
+    expenses_by_day = {}
+    for entry in user_entries.filter(entry_type='expense'):
+        day_of_week = entry.date.strftime('%A')
+        if day_of_week not in expenses_by_day:
+            expenses_by_day[day_of_week] = 0
+        expenses_by_day[day_of_week] += float(entry.amount)
+    
+    highest_spending_day = max(expenses_by_day.items(), key=lambda x: x[1]) if expenses_by_day else ('N/A', 0)
+    
+    # Transaction Count
+    income_count = user_entries.filter(entry_type='income').count()
+    expense_count = user_entries.filter(entry_type='expense').count()
+    total_count = income_count + expense_count
+    
+    # Get transaction counts by day for the chart
+    transaction_count_data = []
+    current_date = start_date
+    while current_date <= end_date:
+        day_entries = user_entries.filter(date=current_date)
+        day_income_count = day_entries.filter(entry_type='income').count()
+        day_expense_count = day_entries.filter(entry_type='expense').count()
+        
+        transaction_count_data.append({
+            'date': current_date.strftime('%d %b'),
+            'income': day_income_count,
+            'expense': day_expense_count,
+            'total': day_income_count + day_expense_count
+        })
+        
+        current_date += timedelta(days=1)
+
     context = {
         'total_income': total_income,
         'total_expenses': total_expenses,
@@ -213,6 +270,13 @@ def dashboard(request):
         'start_date': start_date,
         'end_date': end_date,
         'recent_table': recent_table,
+        'payment_method_data': json.dumps(payment_method_data),
+        'avg_daily_expense': avg_daily_expense,
+        'highest_spending_day': highest_spending_day,
+        'income_count': income_count,
+        'expense_count': expense_count,
+        'total_count': total_count,
+        'transaction_count_data': json.dumps(transaction_count_data),
     }
 
     return render(request, 'dashboard.html', context)
