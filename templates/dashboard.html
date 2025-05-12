@@ -120,62 +120,148 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">Salary Information</h3>
+                    <div class="card-actions">
+                        <a href="{% url 'profile_update' %}" class="btn btn-sm btn-outline-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-edit" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1"></path>
+                                <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z"></path>
+                                <path d="M16 5l3 3"></path>
+                            </svg>
+                            Update Details
+                        </a>
+                    </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-3">
                     <div class="row">
                         <div class="col-sm-6 col-lg-3">
-                            <div class="card">
-                                <div class="card-body">
+                            <div class="card shadow-sm">
+                                <div class="card-body p-3">
                                     <div class="d-flex align-items-center">
                                         <div class="subheader">Gross Salary</div>
                                         <div class="ms-auto">
-                                            <span class="badge bg-primary">{{ user.profile.salary_frequency|title }}</span>
+                                            <span class="badge text-light bg-primary">{{ user.profile.salary_frequency|title }}</span>
                                         </div>
                                     </div>
-                                    <div class="h1 mb-3">₹{{ user.profile.salary_amount|floatformat:2 }}</div>
+                                    <div class="h1 mb-2">₹{{ user.profile.salary_amount|floatformat:2 }}</div>
+                                    <div class="d-flex mt-2 align-items-center">
+                                        <span class="text-muted">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-coin" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
+                                                <path d="M14.8 9a2 2 0 0 0 -1.8 -1h-2a2 2 0 1 0 0 4h2a2 2 0 1 1 0 4h-2a2 2 0 0 1 -1.8 -1"></path>
+                                                <path d="M12 7v10"></path>
+                                            </svg>
+                                            Base Income
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-sm-6 col-lg-3">
-                            <div class="card">
-                                <div class="card-body">
+                            <div class="card shadow-sm">
+                                <div class="card-body p-3">
                                     <div class="d-flex align-items-center">
                                         <div class="subheader">Net Salary</div>
                                         <div class="ms-auto">
-                                            <span class="badge bg-success">{{ user.profile.salary_frequency|title }}</span>
+                                            <span class="badge text-light bg-success">{{ user.profile.salary_frequency|title }}</span>
                                         </div>
                                     </div>
-                                    <div class="h1 mb-3">₹{{ user.profile.get_net_salary|floatformat:2 }}</div>
+                                    <div class="h1 mb-2">₹{{ user.profile.get_net_salary|floatformat:2 }}</div>
+                                    <div class="d-flex mt-2 align-items-center justify-content-between">
+                                        <span class="text-muted">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-cash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                <path d="M7 9m0 2a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z"></path>
+                                                <path d="M14 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
+                                                <path d="M17 9v-2a2 2 0 0 0 -2 -2h-10a2 2 0 0 0 -2 2v6a2 2 0 0 0 2 2h2"></path>
+                                            </svg>
+                                            Take-home
+                                        </span>
+                                        <span class="ms-2 small">
+                                            {% with deductions=user.profile.salary_deductions %}
+                                            {% if deductions > 0 %}
+                                            <span class="text-danger">-₹{{ deductions|floatformat:0 }}</span>
+                                            {% endif %}
+                                            {% endwith %}
+                                            
+                                            {% with allowances=user.profile.salary_allowances %}
+                                            {% if allowances > 0 %}
+                                            <span class="text-success">+₹{{ allowances|floatformat:0 }}</span>
+                                            {% endif %}
+                                            {% endwith %}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-sm-6 col-lg-3">
-                            <div class="card">
-                                <div class="card-body">
+                            <div class="card shadow-sm">
+                                <div class="card-body p-3">
                                     <div class="d-flex align-items-center">
                                         <div class="subheader">Daily Budget</div>
                                         <div class="ms-auto">
-                                            <span class="badge bg-info">Daily</span>
+                                            <span class="badge text-light bg-info">Daily</span>
                                         </div>
                                     </div>
-                                    <div class="h1 mb-3">₹{{ user.profile.get_daily_budget|floatformat:2 }}</div>
+                                    <div class="h1 mb-2">₹{{ user.profile.get_daily_budget|floatformat:2 }}</div>
+                                    <div class="progress progress-sm mt-2">
+                                        {% with daily_budget=user.profile.get_daily_budget %}
+                                        {% with daily_expense=avg_daily_expense %}
+                                        {% if daily_budget > 0 %}
+                                        {% with daily_percent=daily_expense|floatformat:0|stringformat:"s"|add:"0"|div:daily_budget|mul:100 %}
+                                        <div class="progress-bar {% if daily_percent < 70 %}bg-success{% elif daily_percent < 90 %}bg-warning{% else %}bg-danger{% endif %}" style="width: {% if daily_percent > 100 %}100{% else %}{{ daily_percent }}{% endif %}%"></div>
+                                        {% endwith %}
+                                        {% else %}
+                                        <div class="progress-bar bg-danger" style="width: 100%"></div>
+                                        {% endif %}
+                                        {% endwith %}
+                                        {% endwith %}
+                                    </div>
+                                    <div class="d-flex mt-1 align-items-center small">
+                                        <span class="text-muted">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-scale" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                <path d="M7 20l10 0"></path>
+                                                <path d="M6 6l6 -1l6 1"></path>
+                                                <path d="M12 3l0 17"></path>
+                                                <path d="M9 12l-3 -6l-3 6a3 3 0 0 0 6 0"></path>
+                                                <path d="M21 12l-3 -6l-3 6a3 3 0 0 0 6 0"></path>
+                                            </svg>
+                                            Average daily spending
+                                        </span>
+                                        <span class="ms-auto text-muted">₹{{ avg_daily_expense|floatformat:0 }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-sm-6 col-lg-3">
-                            <div class="card">
-                                <div class="card-body">
+                            <div class="card shadow-sm">
+                                <div class="card-body p-3">
                                     <div class="d-flex align-items-center">
                                         <div class="subheader">Next Salary</div>
                                         <div class="ms-auto">
-                                            <span class="badge bg-warning">Due</span>
+                                            <span class="badge text-light bg-warning">Due</span>
                                         </div>
                                     </div>
-                                    <div class="h1 mb-3">{{ user.profile.get_salary_date|date:"d M Y" }}</div>
-                                    <div class="progress progress-sm">
+                                    <div class="h1 mb-2">{{ user.profile.get_salary_date|date:"d M Y" }}</div>
+                                    <div class="progress progress-sm mt-2">
+                                        {% with days_to_salary=user.profile.get_salary_date|timeuntil %}
                                         <div class="progress-bar bg-warning" style="width: 100%"></div>
+                                        {% endwith %}
                                     </div>
-                                    <small class="text-muted">Days until next salary</small>
+                                    <div class="d-flex mt-1 align-items-center text-muted small">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                            <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4"></path>
+                                            <path d="M18 18m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path>
+                                            <path d="M15 3v4"></path>
+                                            <path d="M7 3v4"></path>
+                                            <path d="M3 11h16"></path>
+                                            <path d="M18 16.496v1.504l1 1"></path>
+                                        </svg>
+                                        <span>{{ user.profile.get_salary_date|timeuntil }} left</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -191,7 +277,7 @@
                     <div class="d-flex align-items-center">
                         <div class="subheader">Total Income</div>
                         <div class="ms-auto">
-                            <span class="badge bg-success">Monthly</span>
+                            <span class="badge text-light bg-success">Monthly</span>
                         </div>
                     </div>
                     <div class="h1 mb-3">₹{{ total_income|floatformat:2 }}</div>
@@ -207,7 +293,7 @@
                     <div class="d-flex align-items-center">
                         <div class="subheader">Total Expenses</div>
                         <div class="ms-auto">
-                            <span class="badge bg-danger">Monthly</span>
+                            <span class="badge text-light bg-danger">Monthly</span>
                         </div>
                     </div>
                     <div class="h1 mb-3">₹{{ total_expenses|floatformat:2 }}</div>
@@ -224,7 +310,7 @@
                     <div class="d-flex align-items-center">
                         <div class="subheader">Current Balance</div>
                         <div class="ms-auto">
-                            <span class="badge {% if current_balance >= 0 %}bg-success{% else %}bg-danger{% endif %}">Monthly</span>
+                            <span class="badge text-light {% if current_balance >= 0 %}bg-success{% else %}bg-danger{% endif %}">Monthly</span>
                         </div>
                     </div>
                     <div class="h1 mb-3">₹{{ current_balance|floatformat:2 }}</div>
@@ -240,7 +326,7 @@
                     <div class="d-flex align-items-center">
                         <div class="subheader">Savings Rate</div>
                         <div class="ms-auto">
-                            <span class="badge {% if savings_rate >= 20 %}bg-success{% elif savings_rate >= 10 %}bg-warning{% else %}bg-danger{% endif %}">Monthly</span>
+                            <span class="badge text-light {% if savings_rate >= 20 %}bg-success{% elif savings_rate >= 10 %}bg-warning{% else %}bg-danger{% endif %}">Monthly</span>
                         </div>
                     </div>
                     <div class="h1 mb-3">{{ savings_rate|floatformat:1 }}%</div>
@@ -276,7 +362,7 @@
                     <div class="d-flex align-items-center mb-3">
                         <div class="subheader">Average Daily Expense</div>
                         <div class="ms-auto">
-                            <span class="badge bg-info">Daily</span>
+                            <span class="badge text-light bg-info">Daily</span>
                         </div>
                     </div>
                     <div class="h2 mb-4">₹{{ avg_daily_expense|floatformat:2 }}</div>
@@ -284,7 +370,7 @@
                     <div class="d-flex align-items-center mt-4">
                         <div class="subheader">Highest Spending Day</div>
                         <div class="ms-auto">
-                            <span class="badge bg-warning">{{ highest_spending_day.0 }}</span>
+                            <span class="badge text-light bg-warning">{{ highest_spending_day.0 }}</span>
                         </div>
                     </div>
                     <div class="h2 mb-3">₹{{ highest_spending_day.1|floatformat:2 }}</div>
@@ -401,7 +487,7 @@
                                     <div class="d-flex align-items-center">
                                         <div class="subheader">{{ category.name }}</div>
                                         <div class="ms-auto">
-                                            <span class="badge {% if category.type == 'income' %}bg-success{% else %}bg-danger{% endif %}">
+                                            <span class="badge text-light {% if category.type == 'income' %}bg-success{% else %}bg-danger{% endif %}">
                                                 {{ category.type|title }}
                                             </span>
                                         </div>
@@ -570,7 +656,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 data: monthlyData.map(d => d.income),
                 borderColor: colors.income.main,
                 backgroundColor: colors.income.light,
-                tension: 0.4,
+                tension: 0.3,
                 fill: true,
                 borderWidth: 2,
                 pointBackgroundColor: colors.income.main,
@@ -580,13 +666,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 pointHoverRadius: 5,
                 pointHoverBackgroundColor: colors.income.dark,
                 pointHoverBorderColor: '#fff',
-                pointHoverBorderWidth: 2
+                pointHoverBorderWidth: 2,
+                order: 1
             }, {
                 label: 'Expenses',
                 data: monthlyData.map(d => d.expenses),
                 borderColor: colors.expense.main,
                 backgroundColor: colors.expense.light,
-                tension: 0.4,
+                tension: 0.3,
                 fill: true,
                 borderWidth: 2,
                 pointBackgroundColor: colors.expense.main,
@@ -596,13 +683,60 @@ document.addEventListener('DOMContentLoaded', function() {
                 pointHoverRadius: 5,
                 pointHoverBackgroundColor: colors.expense.dark,
                 pointHoverBorderColor: '#fff',
-                pointHoverBorderWidth: 2
+                pointHoverBorderWidth: 2,
+                order: 2
+            }, {
+                label: 'Balance',
+                data: monthlyData.map(d => d.income - d.expenses),
+                type: 'bar',
+                backgroundColor: monthlyData.map(d => (d.income - d.expenses) >= 0 ? colors.savings.main : colors.expense.main),
+                borderRadius: 4,
+                order: 3,
+                barPercentage: 0.5,
+                categoryPercentage: 0.7,
+                yAxisID: 'y1'
             }]
         },
         options: {
-            ...commonOptions,
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
             plugins: {
-                ...commonOptions.plugins,
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: {
+                            size: 11
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 10,
+                    titleFont: {
+                        size: 13,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 12
+                    },
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    displayColors: true,
+                    boxPadding: 3,
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.raw;
+                            return `${context.dataset.label}: ₹${value.toLocaleString()}`;
+                        }
+                    }
+                },
                 title: {
                     display: true,
                     text: '{% if period_type == "year" %}Monthly{% elif period_type == "month" %}Daily{% else %}Hourly{% endif %} Income vs Expenses',
@@ -611,29 +745,25 @@ document.addEventListener('DOMContentLoaded', function() {
                         size: 14,
                         weight: 'bold'
                     }
-                },
-                tooltip: {
-                    ...commonOptions.plugins.tooltip,
-                    callbacks: {
-                        label: function(context) {
-                            const value = context.raw;
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((value / total) * 100).toFixed(1);
-                            return `${context.dataset.label}: ₹${value.toLocaleString()} (${percentage}%)`;
-                        }
-                    }
                 }
             },
             scales: {
                 y: {
                     beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Amount (₹)',
+                        font: {
+                            size: 11
+                        }
+                    },
                     ticks: {
                         callback: function(value) {
                             return '₹' + value.toLocaleString();
                         },
-                        padding: 10,
+                        padding: 8,
                         font: {
-                            size: 11
+                            size: 10
                         }
                     },
                     grid: {
@@ -641,16 +771,39 @@ document.addEventListener('DOMContentLoaded', function() {
                         color: 'rgba(0, 0, 0, 0.05)'
                     }
                 },
+                y1: {
+                    position: 'right',
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Balance (₹)',
+                        font: {
+                            size: 11
+                        }
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString();
+                        },
+                        padding: 8,
+                        font: {
+                            size: 10
+                        }
+                    },
+                    grid: {
+                        display: false
+                    }
+                },
                 x: {
                     grid: {
                         display: false
                     },
                     ticks: {
-                        padding: 10,
+                        padding: 8,
                         maxRotation: 45,
                         minRotation: 45,
                         font: {
-                            size: 11
+                            size: 10
                         }
                     }
                 }
@@ -843,6 +996,7 @@ document.addEventListener('DOMContentLoaded', function() {
             incomeExpensesChart.data.labels = filteredData.map(d => d.month);
             incomeExpensesChart.data.datasets[0].data = filteredData.map(d => d.income);
             incomeExpensesChart.data.datasets[1].data = filteredData.map(d => d.expenses);
+            incomeExpensesChart.data.datasets[2].data = filteredData.map(d => d.income - d.expenses);
             incomeExpensesChart.update();
             
             const filteredSavings = savingsTrend.slice(-months);
