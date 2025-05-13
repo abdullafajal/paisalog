@@ -51,7 +51,13 @@ class Entry(models.Model):
         ordering = ['-date', '-created_at']
 
     def __str__(self):
-        return f"{self.entry_type.title()} - {self.category.name} - ₹{self.amount}"
+        try:
+            entry_type_title = self.entry_type.title() if self.entry_type else "Unknown"
+            category_name = self.category.name if self.category else "Unknown"
+            amount_str = f"₹{self.amount}" if self.amount is not None else "₹0"
+            return f"{entry_type_title} - {category_name} - {amount_str}"
+        except Exception:
+            return f"Entry #{self.id}"
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
