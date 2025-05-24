@@ -123,6 +123,83 @@
         </div>
     </div>
 
+    {% if has_filters %}
+    <!-- Filtered Summary Cards -->
+    <div class="row row-deck row-cards mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Filtered Results Summary</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row row-deck row-cards">
+                        <div class="col-sm-6 col-lg-4">
+                            <div class="card card-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar avatar-md bg-success-lt">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
+                                                <path d="M15 9l-6 6"></path>
+                                                <path d="M9 9l6 6"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="ms-3">
+                                            <div class="text-muted">Filtered Income</div>
+                                            <div class="h3 mb-0">₹{{ filtered_income|floatformat:2 }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-4">
+                            <div class="card card-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar avatar-md bg-danger-lt">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
+                                                <path d="M15 9l-6 6"></path>
+                                                <path d="M9 9l6 6"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="ms-3">
+                                            <div class="text-muted">Filtered Expenses</div>
+                                            <div class="h3 mb-0">₹{{ filtered_expenses|floatformat:2 }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-4">
+                            <div class="card card-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar avatar-md bg-primary-lt">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
+                                                <path d="M12 8l0 8"></path>
+                                                <path d="M8 12l8 0"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="ms-3">
+                                            <div class="text-muted">Filtered Balance</div>
+                                            <div class="h3 mb-0">₹{{ filtered_balance|floatformat:2 }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Filters and Export -->
     <div class="card mb-3 d-none" id="filterSection">
         <div class="card-header">

@@ -320,7 +320,7 @@ class EntryListView(LoginRequiredMixin, ExportMixin, FilterView, SingleTableView
     table_class = EntryTable
     filterset_class = EntryFilter
     template_name = 'entries/list.html'
-    paginate_by = 10
+    paginate_by = 25
     export_formats = ['csv', 'xlsx']
     paginator_class = LazyPaginator
 
@@ -331,15 +331,25 @@ class EntryListView(LoginRequiredMixin, ExportMixin, FilterView, SingleTableView
         context = super().get_context_data(**kwargs)
         user_entries = Entry.objects.filter(user=self.request.user)
         
-        # Calculate totals
+        # Calculate totals for all entries
         total_income = user_entries.filter(entry_type='income').aggregate(total=Sum('amount'))['total'] or 0
         total_expenses = user_entries.filter(entry_type='expense').aggregate(total=Sum('amount'))['total'] or 0
         current_balance = total_income - total_expenses
+
+        # Calculate totals for filtered entries
+        filtered_queryset = self.filterset.qs
+        filtered_income = filtered_queryset.filter(entry_type='income').aggregate(total=Sum('amount'))['total'] or 0
+        filtered_expenses = filtered_queryset.filter(entry_type='expense').aggregate(total=Sum('amount'))['total'] or 0
+        filtered_balance = filtered_income - filtered_expenses
 
         context.update({
             'total_income': total_income,
             'total_expenses': total_expenses,
             'current_balance': current_balance,
+            'filtered_income': filtered_income,
+            'filtered_expenses': filtered_expenses,
+            'filtered_balance': filtered_balance,
+            'has_filters': bool(self.request.GET),  # Check if any filters are applied
         })
         return context
 
