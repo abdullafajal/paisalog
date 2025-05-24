@@ -2,7 +2,7 @@
 
 var staticCacheName = "django-pwa-v" + new Date().getTime();
 var filesToCache = [
-    '/',
+    '/static/img/maskable_icon_x128.png',
 ];
 
 // Cache on install
