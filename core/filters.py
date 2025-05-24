@@ -38,6 +38,7 @@ class EntryFilter(django_filters.FilterSet):
             'entry_type': ['exact'],
             'category': ['exact'],
             'amount_type': ['exact'],
+            'description': ['icontains'],
         }
     
     def filter_date_from(self, queryset, name, value):
