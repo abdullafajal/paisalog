@@ -471,10 +471,10 @@ class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
         messages.success(self.request, 'Profile updated successfully!')
         return super().form_valid(form)
 
-@cache_control(max_age=0, no_cache=True, no_store=True, must_revalidate=True)
-def service_worker(request):
-    response = HttpResponse(
-        open(os.path.join(settings.STATICFILES_DIRS[0], 'sw.js')).read(),
-        content_type='application/javascript'
-    )
-    return response
+# @cache_control(max_age=0, no_cache=True, no_store=True, must_revalidate=True)
+# def service_worker(request):
+#     response = HttpResponse(
+#         open(os.path.join(settings.STATICFILES_DIRS[0], 'sw.js')).read(),
+#         content_type='application/javascript'
+#     )
+#     return response

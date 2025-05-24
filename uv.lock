@@ -67,6 +67,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/07/41/be2a808627e8ecad97922d6cdcab7e495c20e420fc026c016825a756cb03/django-menu-generator-1.1.0.tar.gz", hash = "sha256:e8f9b808080c4b281f9c5962f39078c76c2007a5ef8ab1f7a81c81dbbe6a9848", size = 38671 }
 
 [[package]]
+name = "django-pwa"
+version = "2.0.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/39/5f/4a77504bb5edd693711ec2a396d47836f0a0b4d3f2fb9dc773f8b450c067/django_pwa-2.0.1.tar.gz", hash = "sha256:5539fabb41fe189cc2a82cb1f0f889b45671a8144d7b5bb5206a9ddd0fddb3c2", size = 448237 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c3/64/5ffd65b8e8e9d5563e863d868c259f69a1af79c878f6be469540c573347c/django_pwa-2.0.1-py3-none-any.whl", hash = "sha256:41dc931c645c6125c556bd753205ca051aa48e5d46edbf281003594f3d76d4a3", size = 453981 },
+]
+
+[[package]]
 name = "django-tables2"
 version = "2.7.5"
 source = { registry = "https://pypi.org/simple" }
@@ -118,6 +130,7 @@ dependencies = [
     { name = "django-environ" },
     { name = "django-filter" },
     { name = "django-menu-generator" },
+    { name = "django-pwa" },
     { name = "django-tables2" },
     { name = "django-widget-tweaks" },
     { name = "openpyxl" },
@@ -131,6 +144,7 @@ requires-dist = [
     { name = "django-environ", specifier = ">=0.11.2" },
     { name = "django-filter", specifier = ">=24.1" },
     { name = "django-menu-generator", specifier = ">=1.1.0" },
+    { name = "django-pwa", specifier = ">=2.0.1" },
     { name = "django-tables2", specifier = ">=2.7.0" },
     { name = "django-widget-tweaks", specifier = ">=1.5.0" },
     { name = "openpyxl", specifier = ">=3.1.5" },

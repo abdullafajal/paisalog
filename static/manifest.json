@@ -1,55 +1,18 @@
+
 {
-    "name": "PaisaLog",
-    "short_name": "PaisaLog",
-    "description": "Track your expenses and income",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#ffffff",
-    "orientation": "portrait-primary",
-    "icons": [
-      {
-        "src": "static/img/maskable_icon_x48.png",
-        "sizes": "48x48",
-        "type": "image/png",
-        "purpose": "maskable"
-      },
-      {
-        "src": "static/img/maskable_icon_x72.png",
-        "sizes": "72x72",
-        "type": "image/png",
-        "purpose": "maskable"
-      },
-      {
-        "src": "static/img/maskable_icon_x96.png",
-        "sizes": "96x96",
-        "type": "image/png",
-        "purpose": "maskable"
-      },
-      {
-        "src": "static/img/maskable_icon_x128.png",
-        "sizes": "128x128",
-        "type": "image/png",
-        "purpose": "maskable"
-      },
-      {
-        "src": "static/img/maskable_icon_x192.png",
-        "sizes": "192x192",
-        "type": "image/png",
-        "purpose": "maskable"
-      },
-      {
-        "src": "static/img/maskable_icon_x384.png",
-        "sizes": "384x384",
-        "type": "image/png",
-        "purpose": "maskable"
-      },
-      {
-        "src": "static/img/maskable_icon_x512.png",
-        "sizes": "512x512",
-        "type": "image/png",
-        "purpose": "maskable"
-      }
-    ]
-  }
-  
+  "name": "Paisa Log",
+  "short_name": "Paisa Log",
+  "description": "Track your expenses and income easily with Paisa Log. A simple and intuitive app to manage your finances.",
+  "start_url": "/",
+  "display": "standalone",
+  "scope": "/",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "status_bar": "default",
+  "icons": [{"src": "/static/img/maskable_icon_x160.png", "sizes": "160x160"}],
+  "dir": "ltr",
+  "lang": "en-US",
+  "screenshots" : [],
+  "shortcuts" : []
+}
